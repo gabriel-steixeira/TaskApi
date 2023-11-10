@@ -21,5 +21,8 @@ namespace TaskApi.Data.Entities
 
         [Column("STATUS")]
         public TaskStatusEnum STATUS { get; set; }
+
+        [NotMapped]
+        public string? STATUS_TAREFA { get; set; }
     }
 }

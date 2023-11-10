@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.OpenApi.Extensions;
 using Swashbuckle.AspNetCore.Annotations;
+using System.Threading.Tasks;
 using TaskApi.Data;
 using TaskApi.Data.Entities;
 
@@ -45,12 +47,14 @@ namespace TaskApi.Controllers
                         Error = true
                     });
 
+            task.STATUS_TAREFA = task.STATUS.GetDisplayName();
+
             return Ok(
                 new
                 {
                     Message = "The task was found!",
                     Task = task
-                });
+        });
         }
 
         /// <summary>
@@ -100,6 +104,8 @@ namespace TaskApi.Controllers
 
             _context.Tasks.Update(task);
             _context.SaveChanges();
+
+            task.STATUS_TAREFA = task.STATUS.GetDisplayName();
 
             return Ok(
                 new
@@ -176,12 +182,7 @@ namespace TaskApi.Controllers
 
             foreach (var task in tasks)
             {
-                if (task.STATUS == 0) {
-                    task.STATUS = TaskStatusEnum.Pendente;
-                }
-                else {
-                    task.STATUS = TaskStatusEnum.Finalizado;
-                }
+                task.STATUS_TAREFA = task.STATUS.GetDisplayName();
             }
 
             return Ok(
@@ -212,13 +213,18 @@ namespace TaskApi.Controllers
         {
             List<TaskClass> tasks = _context.Tasks.Where(x => x.TITULO.Contains(title)).ToList();
 
-            if (tasks == null)
+            if (tasks == null || tasks.Count() == 0)
                 return NotFound(
                     new
                     {
                         Message = "Tasks weren't found. Try againg later...",
                         Error = true
                     });
+
+            foreach (var task in tasks)
+            {
+                task.STATUS_TAREFA = task.STATUS.GetDisplayName();
+            }
 
             return Ok(
                 new
@@ -248,15 +254,20 @@ namespace TaskApi.Controllers
         {
             DateTime date = DateTime.Now;
             DateTime.TryParse(dateTask, out date);
-            List<TaskClass> tasks = _context.Tasks.Where(x => x.DATA == date).ToList();
+            List<TaskClass> tasks = _context.Tasks.Where(x => x.DATA.Day == date.Day).ToList();
 
-            if (tasks == null)
+            if (tasks == null || tasks.Count() == 0)
                 return NotFound(
                     new
                     {
                         Message = "Tasks weren't found. Try againg later...",
                         Error = true
                     });
+
+            foreach (var task in tasks)
+            {
+                task.STATUS_TAREFA = task.STATUS.GetDisplayName();
+            }
 
             return Ok(
                 new
@@ -294,6 +305,11 @@ namespace TaskApi.Controllers
                         Error = true
                     });
 
+            foreach (var task in tasks)
+            {
+                task.STATUS_TAREFA = task.STATUS.GetDisplayName();
+            }
+
             return Ok(
                 new
                 {
@@ -330,6 +346,8 @@ namespace TaskApi.Controllers
 
             _context.Tasks.Add(taskRegister);
             _context.SaveChanges();
+            
+            taskRegister.STATUS_TAREFA = taskRegister.STATUS.GetDisplayName();
 
             return Ok(
                 new
